@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "grp-docx-mcp"
+name = "docx-mcp-custom"
 version = "0.7.4"
 description = "MCP server for creating, reading, and editing Word (.docx) documents with markdown conversion, track changes, comments, footnotes, tables, images, sections, and structural validation"
 readme = "README.md"
@@ -45,9 +45,9 @@ docx-mcp = "docx_mcp.cli:main"
 docx-mcp-server = "docx_mcp.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Arvindh95Censof/grp-docx-mcp"
-Repository = "https://github.com/Arvindh95Censof/grp-docx-mcp"
-Issues = "https://github.com/Arvindh95Censof/grp-docx-mcp/issues"
+Homepage = "https://github.com/Arvindh95Censof/docx-mcp-custom"
+Repository = "https://github.com/Arvindh95Censof/docx-mcp-custom"
+Issues = "https://github.com/Arvindh95Censof/docx-mcp-custom/issues"
 Upstream = "https://github.com/SecurityRonin/docx-mcp"
 
 [tool.hatch.build.targets.wheel]
