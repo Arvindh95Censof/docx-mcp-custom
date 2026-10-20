@@ -21,21 +21,6 @@ jobs:
           name: dist
           path: dist/
 
-  # ── Publish to PyPI via trusted publishing ────────────────────────────────
-
-  pypi:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: release
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
-
   # ── Build standalone binaries with PyInstaller ────────────────────────────
 
   binaries:
@@ -78,7 +63,7 @@ jobs:
   # ── Create GitHub release with all assets ─────────────────────────────────
 
   release:
-    needs: [pypi, binaries]
+    needs: [build, binaries]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

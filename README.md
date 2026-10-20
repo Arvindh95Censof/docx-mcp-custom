@@ -6,8 +6,6 @@
 > `extract_template_structure`) plus cm/align sizing for inline images. All credit for the base project to the
 > original author; see [LICENSE](LICENSE).
 
-[![PyPI](https://img.shields.io/pypi/v/docx-mcp-custom?color=blue)](https://pypi.org/project/docx-mcp-custom/)
-[![Python](https://img.shields.io/pypi/pyversions/docx-mcp-custom)](https://pypi.org/project/docx-mcp-custom/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/SecurityRonin/docx-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/SecurityRonin/docx-mcp/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/SecurityRonin/docx-mcp)
@@ -50,7 +48,7 @@ Your agent handles the entire workflow — opening the file, navigating the stru
 **Claude Code** (recommended):
 
 ```bash
-claude mcp add docx-mcp -- uvx docx-mcp-custom
+claude mcp add docx-mcp -- uvx --from git+https://github.com/Arvindh95Censof/docx-mcp-custom docx-mcp-custom
 ```
 
 That's it. A companion [skill](docx_mcp/skill/SKILL.md) auto-installs the first time the server starts, teaching Claude the document editing workflow, OOXML pitfalls, and audit checklist. It auto-updates on every upgrade.
@@ -67,7 +65,7 @@ Add to your MCP settings:
   "mcpServers": {
     "docx-mcp": {
       "command": "uvx",
-      "args": ["docx-mcp-custom"]
+      "args": ["--from", "git+https://github.com/Arvindh95Censof/docx-mcp-custom", "docx-mcp-custom"]
     }
   }
 }
@@ -82,7 +80,7 @@ Add to your MCP configuration file:
   "mcpServers": {
     "docx-mcp": {
       "command": "uvx",
-      "args": ["docx-mcp-custom"]
+      "args": ["--from", "git+https://github.com/Arvindh95Censof/docx-mcp-custom", "docx-mcp-custom"]
     }
   }
 }
@@ -95,13 +93,15 @@ mcpServers:
   docx-mcp:
     command: uvx
     args:
+      - --from
+      - git+https://github.com/Arvindh95Censof/docx-mcp-custom
       - docx-mcp-custom
 ```
 
 **With pip:**
 
 ```bash
-pip install docx-mcp-custom
+pip install git+https://github.com/Arvindh95Censof/docx-mcp-custom
 ```
 
 </details>
