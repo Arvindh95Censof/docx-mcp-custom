@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "docx-mcp-custom"
-version = "0.7.4"
+version = "0.7.5"
 description = "MCP server for creating, reading, and editing Word (.docx) documents with markdown conversion, track changes, comments, footnotes, tables, images, sections, and structural validation"
 readme = "README.md"
 license = "MIT"
@@ -43,6 +43,7 @@ dev = [
 [project.scripts]
 docx-mcp = "docx_mcp.cli:main"
 docx-mcp-server = "docx_mcp.cli:main"
+docx-mcp-custom = "docx_mcp.cli:main"  # matches the package name so `uvx docx-mcp-custom` works
 
 [project.urls]
 Homepage = "https://github.com/Arvindh95Censof/docx-mcp-custom"

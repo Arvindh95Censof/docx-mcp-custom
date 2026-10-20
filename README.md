@@ -50,7 +50,7 @@ Your agent handles the entire workflow — opening the file, navigating the stru
 **Claude Code** (recommended):
 
 ```bash
-claude mcp add docx-mcp -- uvx docx-mcp-server
+claude mcp add docx-mcp -- uvx docx-mcp-custom
 ```
 
 That's it. A companion [skill](docx_mcp/skill/SKILL.md) auto-installs the first time the server starts, teaching Claude the document editing workflow, OOXML pitfalls, and audit checklist. It auto-updates on every upgrade.
@@ -67,7 +67,7 @@ Add to your MCP settings:
   "mcpServers": {
     "docx-mcp": {
       "command": "uvx",
-      "args": ["docx-mcp-server"]
+      "args": ["docx-mcp-custom"]
     }
   }
 }
@@ -82,7 +82,7 @@ Add to your MCP configuration file:
   "mcpServers": {
     "docx-mcp": {
       "command": "uvx",
-      "args": ["docx-mcp-server"]
+      "args": ["docx-mcp-custom"]
     }
   }
 }
@@ -95,13 +95,13 @@ mcpServers:
   docx-mcp:
     command: uvx
     args:
-      - docx-mcp-server
+      - docx-mcp-custom
 ```
 
 **With pip:**
 
 ```bash
-pip install docx-mcp-server
+pip install docx-mcp-custom
 ```
 
 </details>
