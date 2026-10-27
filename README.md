@@ -251,7 +251,8 @@ Every edit is validated against the OOXML specification before saving, catching 
 | `insert_text` | Insert text as tracked revision (underlined in Word) — or directly with `tracked=False` |
 | `delete_text` | Mark text deleted (red strikethrough in Word) — or remove directly with `tracked=False` |
 | `replace_text` | Replace text as a tracked del+ins pair — or directly with `tracked=False` |
-| `modify_cell` | Modify a table cell — tracked by default, `tracked=False` for direct writes |
+| `modify_cell` | Modify a table cell — tracked by default (only the changed words are marked), `tracked=False` for direct writes |
+| `batch_edit` | Apply several edits in one call — all of them take effect, or none do (a failure restores the document) |
 | `edit_header_footer` | Edit header/footer text — tracked by default, `tracked=False` for direct writes |
 | `set_formatting` | Apply bold/italic/underline/color with tracked-change markup |
 | `set_track_changes` | Enable or disable Word's built-in track-changes recording flag |
@@ -273,7 +274,7 @@ Every edit is validated against the OOXML specification before saving, catching 
 |---|---|
 | `get_tables` | Get all tables with row/column counts and cell content |
 | `add_table` | Insert a new table after a paragraph |
-| `modify_cell` | Modify a table cell with tracked changes |
+| `modify_cell` | Modify a table cell with tracked changes (only the changed words are marked) |
 | `add_table_row` | Add a row to a table |
 | `delete_table_row` | Delete a table row with tracked changes |
 
@@ -288,7 +289,7 @@ Every edit is validated against the OOXML specification before saving, catching 
 | Tool | Description |
 |---|---|
 | `get_comments` | List all comments with ID, author, date, and text |
-| `add_comment` | Add a comment anchored to a paragraph |
+| `add_comment` | Add a comment anchored to a paragraph, or to a phrase inside it (`anchor_text`) |
 | `reply_to_comment` | Reply to an existing comment (threaded) |
 
 ### Footnotes & Endnotes

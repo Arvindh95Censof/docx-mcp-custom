@@ -22,6 +22,7 @@ from .base import (
     _now_iso,
     _preserve,
 )
+from .batch import BatchMixin
 from .bookmarks import BookmarksMixin
 from .captions import CaptionMixin
 from .changesummary import ChangeSummaryMixin
@@ -72,6 +73,7 @@ from .watermark import WatermarkMixin
 
 class DocxDocument(
     BaseMixin,
+    BatchMixin,
     CreationMixin,
     BookmarksMixin,
     ContentControlsMixin,

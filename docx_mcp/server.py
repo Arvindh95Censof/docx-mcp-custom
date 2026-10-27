@@ -1289,6 +1289,41 @@ def replace_text(
 
 
 @mcp.tool()
+def batch_edit(
+    operations: list[dict],
+    author: str = "Claude",
+    document_handle: str = "",
+) -> str:
+    """Apply several edits in one call. All of them take effect, or none do.
+
+    Every operation is checked first; if any operation fails while running, the document is
+    restored to how it was and the error names the failing operation. Save afterwards with
+    save_document. Prefer this over many separate calls when making a set of related edits.
+
+    Each operation is an object with "op" plus the parameters of that edit tool:
+      replace_text:     para_id, find, replace, [context_before, context_after, ignore_case, tracked]
+      insert_text:      para_id, text, [position, context_before, context_after, ignore_case, tracked]
+      delete_text:      para_id, text, [context_before, context_after, ignore_case, tracked]
+      add_comment:      para_id, text, [anchor_text, context_before, context_after, ignore_case]
+      modify_cell:      table_idx, row, col, text, [tracked]
+      insert_paragraph: after_para_id, text, [style]
+      update_paragraph: para_id, [text, style, tracked]
+      delete_paragraph: para_id
+    Each also accepts "author". Example:
+      [{"op": "replace_text", "para_id": "0A1B2C3D", "find": "30 days", "replace": "45 days"},
+       {"op": "add_comment", "para_id": "0A1B2C3D", "text": "Confirm with client",
+        "anchor_text": "45 days"}]
+
+    Args:
+        operations: The operations, applied in order (at most 500).
+        author: Author name for every operation that does not set its own.
+        document_handle: Optional handle for concurrent session isolation.
+    """
+    _, doc = _resolve(document_handle)
+    return _js(doc.batch_edit(operations, author=author))
+
+
+@mcp.tool()
 def get_body_text(document_handle: str = "") -> str:
     """Return the full accepted-view text of the document.
 
@@ -1413,11 +1448,37 @@ def add_comment(
     para_id: str,
     text: str,
     author: str = "Claude",
+    anchor_text: str = "",
+    context_before: str = "",
+    context_after: str = "",
+    ignore_case: bool = False,
     document_handle: str = "",
 ) -> str:
-    """Add a comment anchored to a paragraph."""
+    """Add a comment anchored to a paragraph, or to a phrase inside it.
+
+    Args:
+        para_id: paraId of the target paragraph.
+        text: The comment.
+        author: Author name shown in Word's review pane.
+        anchor_text: Optional phrase inside the paragraph to anchor the comment to. When
+            given, only that phrase is highlighted in Word; without it the whole paragraph is.
+        context_before: Text immediately before anchor_text (if it occurs more than once).
+        context_after: Text immediately after anchor_text (if it occurs more than once).
+        ignore_case: Match anchor_text case-insensitively.
+        document_handle: Optional handle for concurrent session isolation.
+    """
     _, doc = _resolve(document_handle)
-    return _js(doc.add_comment(para_id, text, author=author))
+    return _js(
+        doc.add_comment(
+            para_id,
+            text,
+            author=author,
+            anchor_text=anchor_text,
+            context_before=context_before,
+            context_after=context_after,
+            ignore_case=ignore_case,
+        )
+    )
 
 
 @mcp.tool()

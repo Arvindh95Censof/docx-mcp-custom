@@ -129,7 +129,8 @@ All five editing tools default to `tracked=True`. Pass `tracked=False` to any of
 | `insert_text` | Tracked insertion (underlined in Word) | `para_id`, `text`, `position`, `tracked` |
 | `delete_text` | Tracked deletion (red strikethrough) | `para_id`, `text`, `tracked` |
 | `replace_text` | Tracked del+ins pair — preferred for one-step replacement | `para_id`, `find`, `replace`, `tracked` |
-| `modify_cell` | Modify table cell text | `table_index`, `row`, `col`, `text`, `tracked` |
+| `modify_cell` | Modify table cell text (tracked: only changed words marked) | `table_index`, `row`, `col`, `text`, `tracked` |
+| `batch_edit` | Several edits in one call, all or nothing (a failure restores the document) | `operations` (list of `{op, ...tool params}`), `author` |
 | `edit_header_footer` | Edit header/footer text | `location`, `old_text`, `new_text`, `tracked` |
 | `set_formatting` | Bold/italic/underline/color with tracked markup | `para_id`, `text`, `bold`, `italic`, `underline`, `color` |
 | `set_track_changes` | Toggle Word's track-changes recording flag | `enabled` |
@@ -166,7 +167,7 @@ All five editing tools default to `tracked=True`. Pass `tracked=False` to any of
 | Tool | Purpose | Key args |
 |------|---------|----------|
 | `get_comments` | List all comments | — |
-| `add_comment` | Comment anchored to paragraph | `para_id`, `text` |
+| `add_comment` | Comment on a paragraph, or on a phrase with `anchor_text` | `para_id`, `text`, `anchor_text` (optional) |
 | `reply_to_comment` | Threaded reply | `parent_id`, `text` |
 
 ### Footnotes & Endnotes

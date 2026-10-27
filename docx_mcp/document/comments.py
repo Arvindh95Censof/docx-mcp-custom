@@ -5,6 +5,27 @@ from __future__ import annotations
 from lxml import etree
 
 from .base import W14, W15, W, _now_iso, _preserve
+from .tracks import _flatten_para, _insert_before_slot, _resolve
+
+
+def _place_range(
+    para: etree._Element,
+    slot_s: int,
+    slot_e: int,
+    slots: list,
+    start: etree._Element,
+    end: etree._Element,
+) -> None:
+    """Put the comment range markers around accepted-view characters ``slot_s:slot_e``."""
+    try:
+        _insert_before_slot(para, slots, slot_s, start)
+    except ValueError:  # boundary inside a tracked insertion: widen to the whole w:ins
+        slots[slot_s].in_ins.addprevious(start)
+    slots = _flatten_para(para)  # splitting a run for the start marker invalidates the slots
+    try:
+        _insert_before_slot(para, slots, slot_e, end)
+    except ValueError:
+        slots[slot_e].in_ins.addnext(end)
 
 
 class CommentsMixin:
@@ -30,12 +51,26 @@ class CommentsMixin:
         text: str,
         *,
         author: str = "Claude",
+        anchor_text: str = "",
+        context_before: str = "",
+        context_after: str = "",
+        ignore_case: bool = False,
     ) -> dict:
-        """Add a comment anchored to a paragraph."""
+        """Add a comment anchored to a paragraph, or to *anchor_text* within it.
+
+        With *anchor_text* the comment covers just that phrase (use *context_before* or
+        *context_after* if it occurs more than once); without it, the whole paragraph.
+        """
         doc = self._require("word/document.xml")
         para = self._find_para(doc, para_id)
         if para is None:
             raise ValueError(f"Paragraph '{para_id}' not found")
+
+        anchor = None
+        if anchor_text:
+            anchor = _resolve(
+                doc, para, anchor_text, context_before, context_after, ignore_case=ignore_case
+            )
 
         cm_tree = self._tree("word/comments.xml")
         if cm_tree is None:
@@ -72,28 +107,36 @@ class CommentsMixin:
         # Add range markers in document.xml
         range_start = etree.Element(f"{W}commentRangeStart")
         range_start.set(f"{W}id", str(comment_id))
-
-        ppr = para.find(f"{W}pPr")
-        first_run = para.find(f"{W}r")
-        if first_run is not None:
-            first_run.addprevious(range_start)
-        elif ppr is not None:
-            ppr.addnext(range_start)
-        else:
-            para.insert(0, range_start)
-
-        range_end = etree.SubElement(para, f"{W}commentRangeEnd")
+        range_end = etree.Element(f"{W}commentRangeEnd")
         range_end.set(f"{W}id", str(comment_id))
 
-        ref_run = etree.SubElement(para, f"{W}r")
+        if anchor is not None:
+            slot_s, slot_e, slots = anchor
+            _place_range(para, slot_s, slot_e, slots, range_start, range_end)
+        else:
+            ppr = para.find(f"{W}pPr")
+            first_run = para.find(f"{W}r")
+            if first_run is not None:
+                first_run.addprevious(range_start)
+            elif ppr is not None:
+                ppr.addnext(range_start)
+            else:
+                para.insert(0, range_start)
+            para.append(range_end)
+
+        ref_run = etree.Element(f"{W}r")
         ref_rpr = etree.SubElement(ref_run, f"{W}rPr")
         ref_rs = etree.SubElement(ref_rpr, f"{W}rStyle")
         ref_rs.set(f"{W}val", "CommentReference")
         cref = etree.SubElement(ref_run, f"{W}commentReference")
         cref.set(f"{W}id", str(comment_id))
+        range_end.addnext(ref_run)
         self._mark("word/document.xml")
 
-        return {"comment_id": comment_id, "para_id": para_id, "author": author, "date": now}
+        result = {"comment_id": comment_id, "para_id": para_id, "author": author, "date": now}
+        if anchor is not None:
+            result["anchor_text"] = "".join(s.char for s in anchor[2][anchor[0] : anchor[1]])
+        return result
 
     def reply_to_comment(
         self,

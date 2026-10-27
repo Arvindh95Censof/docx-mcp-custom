@@ -9,6 +9,7 @@ import io
 from lxml import etree
 
 from .base import W14, W, _now_iso, _preserve
+from .tracks import _flatten_para
 
 _CM_TO_TWIPS = 567
 
@@ -119,6 +120,9 @@ class TablesMixin:
     ) -> dict:
         """Modify a table cell, with tracked changes by default.
 
+        A tracked edit of a non-empty cell marks only the words that actually change,
+        like replace_text. Returns ``modified: False`` when the text is already there.
+
         Args:
             table_idx: Table index (0-based).
             row: Row index (0-based).
@@ -148,27 +152,55 @@ class TablesMixin:
             para.set(f"{W14}textId", "77777777")
 
         if tracked:
-            # Delete existing runs as w:del
-            for run_el in list(para.findall(f"{W}r")):
-                t_el = run_el.find(f"{W}t")
-                if t_el is None or not t_el.text:
-                    continue
-                rpr = run_el.find(f"{W}rPr")
-                rpr_bytes = etree.tostring(rpr) if rpr is not None else None
-                parent = run_el.getparent()
-                pos = list(parent).index(run_el)
-                parent.remove(run_el)
-                del_el = etree.Element(f"{W}del")
-                del_el.set(f"{W}id", str(cid))
-                del_el.set(f"{W}author", author)
-                del_el.set(f"{W}date", now)
-                del_run = etree.SubElement(del_el, f"{W}r")
-                if rpr_bytes:
-                    del_run.append(etree.fromstring(rpr_bytes))
-                dt = etree.SubElement(del_run, f"{W}delText")
-                _preserve(dt, t_el.text)
-                parent.insert(pos, del_el)
-                cid = self._next_markup_id(doc)
+            old_text = "".join(s.char for s in _flatten_para(para))
+            minimal = old_text == text
+            if old_text and not minimal:
+                try:
+                    self._replace_in_para(
+                        doc,
+                        para,
+                        old_text,
+                        text,
+                        author=author,
+                        context_before="",
+                        context_after="",
+                        ignore_case=False,
+                        tracked=True,
+                    )
+                    minimal = True
+                except ValueError:
+                    pass  # text sits inside an earlier tracked insertion: replace the whole cell
+            if old_text and minimal:
+                changed = old_text != text
+                return {
+                    "modified": changed,
+                    "table_index": table_idx,
+                    "cell": [row, col],
+                    "text": text,
+                }
+
+        if tracked:
+            # Delete existing runs as w:del, including text inside earlier tracked insertions
+            for container in (para, *para.findall(f"{W}ins")):
+                for run_el in list(container.findall(f"{W}r")):
+                    t_el = run_el.find(f"{W}t")
+                    if t_el is None or not t_el.text:
+                        continue
+                    rpr = run_el.find(f"{W}rPr")
+                    rpr_bytes = etree.tostring(rpr) if rpr is not None else None
+                    pos = list(container).index(run_el)
+                    container.remove(run_el)
+                    del_el = etree.Element(f"{W}del")
+                    del_el.set(f"{W}id", str(cid))
+                    del_el.set(f"{W}author", author)
+                    del_el.set(f"{W}date", now)
+                    del_run = etree.SubElement(del_el, f"{W}r")
+                    if rpr_bytes:
+                        del_run.append(etree.fromstring(rpr_bytes))
+                    dt = etree.SubElement(del_run, f"{W}delText")
+                    _preserve(dt, t_el.text)
+                    container.insert(pos, del_el)
+                    cid = self._next_markup_id(doc)
 
             # Insert new text as w:ins
             ins = etree.SubElement(para, f"{W}ins")

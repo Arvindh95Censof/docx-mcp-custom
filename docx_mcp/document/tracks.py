@@ -762,7 +762,32 @@ class TracksMixin:
         para = self._find_para(doc, para_id)
         if para is None:
             raise ValueError(f"Paragraph '{para_id}' not found")
+        return self._replace_in_para(
+            doc,
+            para,
+            find,
+            replace,
+            author=author,
+            context_before=context_before,
+            context_after=context_after,
+            ignore_case=ignore_case,
+            tracked=tracked,
+        )
 
+    def _replace_in_para(
+        self,
+        doc: etree._Element,
+        para: etree._Element,
+        find: str,
+        replace: str,
+        *,
+        author: str,
+        context_before: str,
+        context_after: str,
+        ignore_case: bool,
+        tracked: bool,
+    ) -> dict:
+        """Core of replace_text for a paragraph element (also used by modify_cell)."""
         slot_s, slot_e, slots = _resolve(
             doc, para, find, context_before, context_after, ignore_case=ignore_case
         )
